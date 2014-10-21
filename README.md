@@ -1,2 +1,2 @@
-factor-connector-timer
+Factor.io Connector for Chef
 ======================
