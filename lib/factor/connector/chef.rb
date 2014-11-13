@@ -50,7 +50,7 @@ Factor::Connector.service 'chef' do
       fail "Couldn't parse input parameters", exception: ex
     end
 
-    ssh_settings = { keys: [private_key_file.path] }
+    ssh_settings = { keys: [private_key_file.path], paranoid: false }
     ssh_settings[:port] = port if port
 
     fail 'User (user) is required in host address' unless user
