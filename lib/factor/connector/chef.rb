@@ -55,8 +55,9 @@ Factor::Connector.service 'chef' do
     fail 'User (user) is required in host address' unless user
     fail 'Host variable must specific host address' unless host
 
+    install_command = 'curl -L https://www.opscode.com/chef/install.sh | sudo bash'
     setup_commands = [
-      'curl -L https://www.opscode.com/chef/install.sh | sudo bash',
+      install_command,
       'mkdir -p /etc/chef',
       'cd /etc/chef',
     ]
@@ -83,10 +84,18 @@ Factor::Connector.service 'chef' do
           info "  running '#{command}'"
           returned = ssh.exec!(command)
           if returned && returned.is_a?(String)
-            lines = returned.split("\n")
-            lines.each do |line|
-              info "    #{line}"
+            if command == install_command
+              if returned.include?('Thank you for installing Chef!')
+                info "Chef installed successfully"
+              else
+                lines = returned.split("\n")
+                lines.each {|line| error "    #{line}" }
+                fail "Install failed" 
+              end
             end
+
+            lines = returned.split("\n")
+            lines.each {|line| info "    #{line}" }
             output = output + lines
           end
         end
