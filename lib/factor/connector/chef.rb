@@ -127,7 +127,6 @@ Factor::Connector.service 'chef' do
       private_key_file.unlink
       validation_key_file.unlink
     rescue
-      warn 'Failed to clean up, but no worries, work will go on.'
     end
 
     action_callback output: output
