@@ -4,6 +4,50 @@ require 'net/scp'
 require 'tempfile'
 require 'uri'
 
+class Net::SSH::Connection::Session
+  class CommandFailed < StandardError
+  end
+
+  class CommandExecutionFailed < StandardError
+  end
+
+  def exec_sc!(command)
+    stdout_data,stderr_data = "",""
+    exit_code,exit_signal = nil,nil
+    self.open_channel do |channel|
+      channel.exec(command) do |_, success|
+        raise CommandExecutionFailed, "Command \"#{command}\" was unable to execute" unless success
+
+        channel.on_data do |_,data|
+          stdout_data += data
+        end
+
+        channel.on_extended_data do |_,_,data|
+          stderr_data += data
+        end
+
+        channel.on_request("exit-status") do |_,data|
+          exit_code = data.read_long
+        end
+
+        channel.on_request("exit-signal") do |_, data|
+          exit_signal = data.read_long
+        end
+      end
+    end
+    self.loop
+
+    raise CommandFailed, "Command \"#{command}\" returned exit code #{exit_code}" unless exit_code == 0
+
+    {
+      stdout:stdout_data,
+      stderr:stderr_data,
+      exit_code:exit_code,
+      exit_signal:exit_signal
+    }
+  end
+end
+
 Factor::Connector.service 'chef' do
   action 'bootstrap' do |params|
     host_param     = params['host']
@@ -82,21 +126,25 @@ Factor::Connector.service 'chef' do
         info 'Running setup commands'
         setup_commands.each do |command|
           info "  running '#{command}'"
-          returned = ssh.exec!(command)
-          if returned && returned.is_a?(String)
-            if command == install_command
-              if returned.include?('Thank you for installing Chef!')
-                info "Chef installed successfully"
-              else
-                lines = returned.split("\n")
-                lines.each {|line| error "    #{line}" }
-                fail "Install failed" 
-              end
-            end
+          returned = ssh.exec_sc!(command)
 
-            lines = returned.split("\n")
-            lines.each {|line| info "    #{line}" }
-            output = output + lines
+          returned[:stdout].split("\n").each do |line|
+            if returned[:exit_code]==0
+              info "    #{line}"
+            else
+              error "    #{line}"
+            end
+          end
+          returned[:stderr].split("\n").each do |line|
+            warn "    #{line}"
+          end
+
+          if command == install_command
+            if returned[:stdout].include?('Thank you for installing Chef!') && returned[:exit_code]==0
+              info "Chef installed successfully"
+            else
+              fail "Install failed" 
+            end
           end
         end
 
@@ -115,13 +163,24 @@ Factor::Connector.service 'chef' do
         info 'Running chef bootstrap commands'
         run_commands.each do |command|
           info "  running '#{command}'"
-          returned = ssh.exec!(command)
-          if returned && returned.is_a?(String)
-            lines = returned.split("\n")
-            lines.each do |line|
+
+          returned = ssh.exec_sc!(command)
+
+          returned[:stdout].split("\n").each do |line|
+            if returned[:exit_code]==0
               info "    #{line}"
+            else
+              error "    #{line}"
             end
-            output = output + lines
+          end
+          returned[:stderr].split("\n").each do |line|
+            warn "    #{line}"
+          end
+
+          if returned[:exit_code]==0
+            info "Command '#{command}' finished successfully"
+          else
+            fail "Command '#{command}' failed to run, exit code: #{returned[:exit_code]}" 
           end
         end
       end
@@ -138,6 +197,6 @@ Factor::Connector.service 'chef' do
     rescue
     end
 
-    action_callback output: output
+    action_callback output: 'complete'
   end
 end
