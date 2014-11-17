@@ -12,6 +12,7 @@ Factor::Connector.service 'chef' do
     runlist        = params['runlist']
     organization   = params['organization']
     node_name      = params['name']
+    environment    = params['environment']
 
     fail 'Host is required' unless host_param
     fail 'Private Key (private_key) is required' unless private_key
@@ -29,8 +30,6 @@ Factor::Connector.service 'chef' do
     client_rb << "chef_server_url  \"https://api.opscode.com/organizations/#{organization}\"\n"
     client_rb << "validation_client_name \"#{validation_name}\"\n"
     client_rb << "node_name \"#{node_name}\"\n"
-
-
 
     info 'Setting up private key'
     begin
@@ -62,8 +61,17 @@ Factor::Connector.service 'chef' do
       'cd /etc/chef',
     ]
 
+    chef_client_options = {}
+    chef_client_options['runlist'] = runlist
+    chef_client_options['environment'] = environment if environment
+
+    run_command = []
+    chef_client_options.each do |option, value|
+      run_command << "--#{option} #{value}"
+    end
+
     run_commands = [
-      "chef-client --runlist #{runlist}"
+      "chef-client #{run_command.join(' ')}"
     ]
 
     output = []
