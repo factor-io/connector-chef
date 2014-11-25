@@ -57,21 +57,26 @@ Factor::Connector.service 'chef' do
     organization   = params['organization']
     node_name      = params['name']
     environment    = params['environment']
+    chef_server    = params['chef_server']
+    output         = {}
 
     fail 'Host is required' unless host_param
     fail 'Private Key (private_key) is required' unless private_key
     fail 'Validation Key (validation_key) is required' unless validation_key
-    fail 'Organization (organization) is required' unless organization
+    fail 'Organization (organization) or Chef Server URL (chef_server) is required' unless organization || chef_server
+    fail 'Organization (organization) or Chef Server URL (chef_server) is required, but not both' if organization && chef_server
     fail 'Runlist (runlist) is required' unless runlist
     fail 'Node Name (name) is required' unless node_name
 
     validation_name = params['validation_name'] || "#{organization}-validator"
 
+    chef_server ||= "https://api.opscode.com/organizations/#{organization}"
+    info "Using '#{chef_server}' as the Chef Server address"
 
     info 'Setting  up the client.rb file'
     client_rb = ""
     client_rb << "log_location STDOUT\n"
-    client_rb << "chef_server_url  \"https://api.opscode.com/organizations/#{organization}\"\n"
+    client_rb << "chef_server_url  \"#{chef_server}\"\n"
     client_rb << "validation_client_name \"#{validation_name}\"\n"
     client_rb << "node_name \"#{node_name}\"\n"
 
@@ -119,24 +124,24 @@ Factor::Connector.service 'chef' do
       "chef-client #{run_command.join(' ')}"
     ]
 
-    output = []
     begin
       Net::SSH.start(host, user, ssh_settings) do |ssh|
 
         info 'Running setup commands'
         setup_commands.each do |command|
           info "  running '#{command}'"
+          output[command] ||= []
           returned = ssh.exec_sc!(command)
 
           returned[:stdout].split("\n").each do |line|
             if returned[:exit_code]==0
-              info "    #{line}"
+              output[command] << line
             else
               error "    #{line}"
             end
           end
           returned[:stderr].split("\n").each do |line|
-            warn "    #{line}"
+            output[command] << line
           end
 
           if command == install_command
@@ -162,19 +167,20 @@ Factor::Connector.service 'chef' do
 
         info 'Running chef bootstrap commands'
         run_commands.each do |command|
+          output[command] ||=[]
           info "  running '#{command}'"
 
           returned = ssh.exec_sc!(command)
 
           returned[:stdout].split("\n").each do |line|
             if returned[:exit_code]==0
-              info "    #{line}"
+              output[command] << line
             else
               error "    #{line}"
             end
           end
           returned[:stderr].split("\n").each do |line|
-            warn "    #{line}"
+            output[command] << line
           end
 
           if returned[:exit_code]==0
@@ -196,7 +202,6 @@ Factor::Connector.service 'chef' do
       validation_key_file.unlink
     rescue
     end
-
-    action_callback output: 'complete'
+    action_callback status: 'complete', output: output
   end
 end
