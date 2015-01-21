@@ -2,6 +2,7 @@ language: ruby
 rvm:
 - 2.1.3
 before_install:
+- mkdir -p resources
 - openssl aes-256-cbc -K $encrypted_97d1bdceee93_key -iv $encrypted_97d1bdceee93_iv
   -in factor-test.pem.enc -out resources/factor-test.pem -d
 - openssl aes-256-cbc -K $encrypted_97d1bdceee93_key -iv $encrypted_97d1bdceee93_iv
