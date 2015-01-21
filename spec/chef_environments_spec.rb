@@ -4,6 +4,13 @@ describe 'chef' do
   describe ':: environments' do
     before do
       @service_instance = service_instance('chef_environments')
+      @env_name = "env-#{SecureRandom.hex(4)}"
+      @environment = chef.environments.create name: @env_name, description:"A test environment"
+    end
+
+    after do
+      env = chef.environments.fetch(@env_name)
+      env.destroy if env
     end
 
     it ':: all' do
@@ -25,7 +32,7 @@ describe 'chef' do
     end
 
     it ':: get' do
-      params = @params.merge({'id'=>'_default'})
+      params = @params.merge({'id'=>@env_name})
 
       @service_instance.test_action('get',params) do
         content = expect_return[:payload]
