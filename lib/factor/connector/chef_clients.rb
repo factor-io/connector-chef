@@ -72,11 +72,13 @@ Factor::Connector.service 'chef_clients' do
 
     begin
       chef = ChefAPI::Connection.new connection_settings
-      client = chef.clients.fetch(id)
+      content = chef.clients.fetch(id)
     rescue
       fail "Couldn't get list of clients, check your credentials"
     end
 
-    action_callback client.to_hash
+    fail "Client with id '#{id}' not found" unless content
+
+    action_callback content.to_hash
   end
 end

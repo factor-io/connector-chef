@@ -77,6 +77,8 @@ Factor::Connector.service 'chef_environments' do
       fail "Couldn't get list of clients, check your credentials"
     end
 
+    fail "Environment with id '#{id}' not found" unless content
+
     action_callback content.to_hash
   end
 end
