@@ -21,7 +21,7 @@ RSpec.configure do |c|
   end
 
   def client_key_file
-    File.expand_path('./resources/factor-test.pem')
+    File.expand_path('./factor-test.pem')
   end
 
   def client_key
@@ -29,7 +29,7 @@ RSpec.configure do |c|
   end
 
   def validation_key_file
-    File.expand_path('./resources/factor-test-validator.pem')
+    File.expand_path('./factor-test-validator.pem')
   end
 
   def validation_key

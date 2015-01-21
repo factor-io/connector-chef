@@ -3,9 +3,9 @@ rvm:
 - 2.1.3
 before_install:
 - openssl aes-256-cbc -K $encrypted_97d1bdceee93_key -iv $encrypted_97d1bdceee93_iv
-  -in factor-test-validator.pem.enc -out ./resources/factor-test-validator.pem -d
+  -in factor-test-validator.pem.enc -out factor-test-validator.pem -d
 - openssl aes-256-cbc -K $encrypted_97d1bdceee93_key -iv $encrypted_97d1bdceee93_iv
-  -in factor-test.pem.enc -out ./resources/factor-test.pem -d
+  -in factor-test.pem.enc -out factor-test.pem -d
 env:
   global:
     secure: hNvKhy3BjEXiN93LdJeT2l6FbHkwoZ09MaQYap+7uZ9e0STMV6Tcg1rKzZsVOT0DV7LEE9XlKb42E0g6xZfKP8cw/BXUk+XCsfm5dTjDbDQtH2TmBxgfY3aGRI2AQnkHhR7g/6NWsaghab/Buc1dbyORkd4mQ45f+VbdUlwnbKY=
