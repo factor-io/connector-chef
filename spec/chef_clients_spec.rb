@@ -8,7 +8,8 @@ describe 'chef' do
     end
 
     after do
-      chef.clients.fetch('my-test-client').destroy
+      client = chef.clients.fetch('my-test-client')
+      client.destroy if client
     end
 
     it ':: all' do
@@ -61,6 +62,17 @@ describe 'chef' do
         expect(content).to include(:validator)
       end
       chef.clients.fetch(client_name).destroy
+    end
+
+    it ':: delete' do
+      name = @client.name
+      params = @params.merge('id'=>name)
+
+      @service_instance.test_action('delete',params) do
+        expect_return
+        found_client = chef.clients.fetch(name)
+        expect(found_client).to be_nil
+      end
     end
   end
 end
