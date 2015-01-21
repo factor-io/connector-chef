@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     factor-connector-chef (0.0.5)
+      chef-api (~> 0.5.0)
       factor-connector-api (~> 0.0.13)
       net-scp (~> 1.2.1)
       net-ssh (~> 2.9.1)
@@ -11,17 +12,22 @@ GEM
   specs:
     celluloid (0.16.0)
       timers (~> 4.0.0)
+    chef-api (0.5.0)
+      logify (~> 0.1)
+      mime-types
     codeclimate-test-reporter (0.3.0)
       simplecov (>= 0.7.1, < 1.0.0)
     diff-lcs (1.2.5)
     docile (1.1.5)
-    factor-connector-api (0.0.13)
+    factor-connector-api (0.0.14)
       celluloid (~> 0.16.0)
     hitimes (1.2.2)
+    logify (0.2.0)
+    mime-types (2.4.3)
     multi_json (1.10.1)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
-    net-ssh (2.9.1)
+    net-ssh (2.9.2)
     rake (10.3.2)
     rspec (3.1.0)
       rspec-core (~> 3.1.0)

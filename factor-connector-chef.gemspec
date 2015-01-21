@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'net-ssh','~> 2.9.1'
   s.add_runtime_dependency 'net-scp','~> 1.2.1'
   s.add_runtime_dependency 'factor-connector-api', '~> 0.0.13'
+  s.add_runtime_dependency 'chef-api', '~> 0.5.0'
 
   s.add_development_dependency 'codeclimate-test-reporter', '~> 0.3.0'
   s.add_development_dependency 'rspec', '~> 3.1.0'
