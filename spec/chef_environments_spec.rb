@@ -29,6 +29,8 @@ describe 'chef' do
         expect(content[:override_attributes]).to be_a(Hash)
         expect(content[:cookbook_versions]).to be_a(Hash)
       end
+
+      chef.environments.fetch(env_name).destroy
     end
 
     it ':: all' do
