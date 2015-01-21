@@ -4,18 +4,23 @@ describe 'chef' do
   describe ':: clients' do
     before do
       @service_instance = service_instance('chef_clients')
+      @client = chef.clients.create name: 'my-test-client'
+    end
+
+    after do
+      chef.clients.fetch('my-test-client').destroy
     end
 
     it ':: all' do
-      params = {
-        'client_key'   => File.read(File.expand_path('~/Dropbox/Factor/Dev/chef/skierkowski.pem')),
-        'client_name'  => 'skierkowski',
-        'organization' => 'factor'
-      }
 
-      @service_instance.test_action('all',params) do
+      @service_instance.test_action('all',@params) do
         content = expect_return[:payload]
         expect(content).to be_a(Array)
+        
+        expect(content.length).to be > 0
+        found_client = content.find{|c| c[:name]=='my-test-client'}
+        expect(found_client).not_to be_nil
+
         content.each do |client|
           expect(client).to be_a(Hash)
           expect(client).to include(:name)
@@ -27,13 +32,9 @@ describe 'chef' do
       end
     end
 
+
     it ':: get' do
-      params = {
-        'client_key'   => File.read(File.expand_path('~/Dropbox/Factor/Dev/chef/skierkowski.pem')),
-        'client_name'  => 'skierkowski',
-        'organization' => 'factor',
-        'id'           => 'rackspace-console-dfw-02'
-      }
+      params = @params.merge('id'=>@client.name)
 
       @service_instance.test_action('get',params) do
         content = expect_return[:payload]

@@ -7,13 +7,7 @@ describe 'chef' do
     end
 
     it ':: all' do
-      params = {
-        'client_key'   => File.read(File.expand_path('~/Dropbox/Factor/Dev/chef/skierkowski.pem')),
-        'client_name'  => 'skierkowski',
-        'organization' => 'factor'
-      }
-
-      @service_instance.test_action('all',params) do
+      @service_instance.test_action('all',@params) do
         content = expect_return[:payload]
         expect(content).to be_a(Array)
         content.each do |client|
@@ -31,12 +25,7 @@ describe 'chef' do
     end
 
     it ':: get' do
-      params = {
-        'client_key'   => File.read(File.expand_path('~/Dropbox/Factor/Dev/chef/skierkowski.pem')),
-        'client_name'  => 'skierkowski',
-        'organization' => 'factor',
-        'id'           => '_default'
-      }
+      params = @params.merge({'id'=>'_default'})
 
       @service_instance.test_action('get',params) do
         content = expect_return[:payload]
