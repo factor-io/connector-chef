@@ -55,6 +55,17 @@ describe 'chef' do
       @service_instance.test_action('get',params) do
         content = expect_return[:payload]
         expect(content).to be_a(Hash)
+    it ':: delete' do
+      name = @env_name
+      params = @params.merge({'id'=>name})
+    
+      @service_instance.test_action('delete',params) do
+        expect_return
+        found_environment = chef.environments.fetch(name)
+        expect(found_environment).to be_nil
+      end
+    end
+
         expect(content).to be_a(Hash)
         expect(content).to include(:name)
         expect(content).to include(:description)

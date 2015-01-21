@@ -127,4 +127,45 @@ Factor::Connector.service 'chef_environments' do
 
     action_callback content.to_hash
   end
+
+  action 'delete' do |params|
+    organization = params['organization']
+    chef_server  = params['chef_server']
+    client_name  = params['client_name']
+    key          = params['client_key']
+    id           = params['id']
+
+    fail 'Client Name (client_name) is required' unless client_name
+    fail 'Private Key (client_key) is required' unless key
+    fail 'Organization (organization) or Chef Server URL (chef_server) is required' unless organization || chef_server
+    fail 'Organization (organization) or Chef Server URL (chef_server) is required, but not both' if organization && chef_server
+    fail 'Environment ID (id) is required' unless id
+
+    chef_server ||= "https://api.opscode.com/organizations/#{organization}"
+
+    info 'Setting up private key'
+    begin
+      private_key_file = Tempfile.new('private')
+      private_key_file.write(key)
+      private_key_file.close
+    rescue
+      fail 'Failed to setup private key'
+    end
+
+    connection_settings = {
+      endpoint: chef_server,
+      client:   client_name,
+      key:      private_key_file.path,
+    }
+
+    begin
+      chef = ChefAPI::Connection.new connection_settings
+      content = chef.environments.fetch(id)
+      content.destroy
+    rescue => ex
+      fail ex.message
+    end
+
+    action_callback
+  end
 end
