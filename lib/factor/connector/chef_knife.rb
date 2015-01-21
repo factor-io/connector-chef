@@ -51,7 +51,7 @@ end
 Factor::Connector.service 'chef_knife' do
   action 'bootstrap' do |params|
     host_param     = params['host']
-    private_key    = params['private_key']
+    client_key     = params['client_key']
     validation_key = params['validation_key']
     runlist        = params['runlist']
     organization   = params['organization']
@@ -61,7 +61,7 @@ Factor::Connector.service 'chef_knife' do
     output         = {}
 
     fail 'Host is required' unless host_param
-    fail 'Private Key (private_key) is required' unless private_key
+    fail 'Private Key (client_key) is required' unless client_key
     fail 'Validation Key (validation_key) is required' unless validation_key
     fail 'Organization (organization) or Chef Server URL (chef_server) is required' unless organization || chef_server
     fail 'Organization (organization) or Chef Server URL (chef_server) is required, but not both' if organization && chef_server
@@ -83,7 +83,7 @@ Factor::Connector.service 'chef_knife' do
     info 'Setting up private key'
     begin
       private_key_file = Tempfile.new('private')
-      private_key_file.write(private_key)
+      private_key_file.write(client_key)
       private_key_file.close
     rescue
       fail 'Failed to setup private key'
