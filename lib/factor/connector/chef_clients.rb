@@ -74,7 +74,7 @@ Factor::Connector.service 'chef_clients' do
       chef = ChefAPI::Connection.new connection_settings
       content = chef.clients.fetch(id)
     rescue
-      fail "Couldn't get list of clients, check your credentials"
+      fail "Couldn't get the client, check your credentials"
     end
 
     fail "Client with id '#{id}' not found" unless content
