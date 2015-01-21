@@ -13,6 +13,24 @@ describe 'chef' do
       env.destroy if env
     end
 
+    it ':: create' do
+      env_name = "test-#{SecureRandom.hex(4)}"
+      params = @params.merge({'name'=>env_name,'description'=>'A test env'})
+
+      @service_instance.test_action('create',params) do
+        content = expect_return[:payload]
+        expect(content).to be_a(Hash)
+        expect(content).to include(:name)
+        expect(content).to include(:description)
+        expect(content).to include(:default_attributes)
+        expect(content).to include(:override_attributes)
+        expect(content).to include(:cookbook_versions)
+        expect(content[:default_attributes]).to be_a(Hash)
+        expect(content[:override_attributes]).to be_a(Hash)
+        expect(content[:cookbook_versions]).to be_a(Hash)
+      end
+    end
+
     it ':: all' do
       @service_instance.test_action('all',@params) do
         content = expect_return[:payload]
