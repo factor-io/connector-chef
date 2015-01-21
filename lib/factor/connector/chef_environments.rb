@@ -34,7 +34,7 @@ Factor::Connector.service 'chef_environments' do
       chef = ChefAPI::Connection.new connection_settings
       contents = chef.environments.all
     rescue => ex
-      fail "Couldn't get list of environments, check your credentials"
+      fail ex.message
     end
 
     action_callback contents.map {|c| c.to_hash}
@@ -73,8 +73,8 @@ Factor::Connector.service 'chef_environments' do
     begin
       chef = ChefAPI::Connection.new connection_settings
       content = chef.environments.fetch(id)
-    rescue
-      fail "Couldn't get list of clients, check your credentials"
+    rescue => ex
+      fail ex.message
     end
 
     fail "Environment with id '#{id}' not found" unless content
