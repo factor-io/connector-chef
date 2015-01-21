@@ -48,7 +48,7 @@ class Net::SSH::Connection::Session
   end
 end
 
-Factor::Connector.service 'chef' do
+Factor::Connector.service 'chef_knife' do
   action 'bootstrap' do |params|
     host_param     = params['host']
     private_key    = params['private_key']

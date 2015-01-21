@@ -1,12 +1,12 @@
 require 'spec_helper'
 
-describe 'Chef' do
-  describe 'Bootstrap' do
+describe 'chef' do
+  describe ':: knife' do
     before do
-      @service_instance = service_instance('chef')
+      @service_instance = service_instance('chef_knife')
     end
 
-    it 'can boostrap a server' do
+    it ':: bootstrap' do
 
       params = {
         'host' => 'root@sandbox.factor.io',
