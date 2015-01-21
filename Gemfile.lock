@@ -3,6 +3,7 @@ PATH
   specs:
     factor-connector-chef (0.0.5)
       chef-api (~> 0.5.0)
+      deep_merge (~> 1.0.1)
       factor-connector-api (~> 0.0.13)
       net-scp (~> 1.2.1)
       net-ssh (~> 2.9.1)
@@ -17,6 +18,7 @@ GEM
       mime-types
     codeclimate-test-reporter (0.4.5)
       simplecov (>= 0.7.1, < 1.0.0)
+    deep_merge (1.0.1)
     diff-lcs (1.2.5)
     docile (1.1.5)
     factor-connector-api (0.0.14)
