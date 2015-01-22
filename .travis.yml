@@ -8,3 +8,10 @@ env:
 before_install:
   - openssl aes-256-cbc -k "$SUPER_SECRET_PASSWORD" -in factor-test.pem.enc -out factor-test.pem -d
   - openssl aes-256-cbc -k "$SUPER_SECRET_PASSWORD" -in factor-test-validator.pem.enc -out factor-test-validator.pem -d
+deploy:
+  provider: rubygems
+  gem: factor-connector-chef
+  api_key:
+    secure: T24epDVon+Cx5yVd02i1ToHjr5pWnMjTCyudzlAXLBF9Rtsta6N6O41RNuHk94KXzoyfS4r8snblzENqR4OFYGE7VkDR1S14nE1rJWM7O9H3ExJh+mPrGtZNQ2Iaxl/a6wGNUb8TQYQEV8v+Qdt7FyFvtESZxHbSClJ7ChOZ1v0=
+  on:
+    tags: true
