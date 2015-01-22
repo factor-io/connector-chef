@@ -97,7 +97,7 @@ Factor::Connector.service 'chef_databags' do
     fail 'Private Key (client_key) is required' unless key
     fail 'Organization (organization) or Chef Server URL (chef_server) is required' unless organization || chef_server
     fail 'Organization (organization) or Chef Server URL (chef_server) is required, but not both' if organization && chef_server
-    fail 'New Organization Name (name) is required' unless params['name']
+    fail 'New Data Bag Name (name) is required' unless params['name']
 
     if items
       fail "Items (items) must be an Array" unless items.is_a?(Array)
@@ -132,6 +132,64 @@ Factor::Connector.service 'chef_databags' do
       end
 
       content = chef.data_bags.fetch(name)
+    rescue => ex
+      fail ex.message
+    end
+
+    action_callback content.to_hash
+  end
+
+  action 'update' do |params|
+    organization = params['organization']
+    chef_server  = params['chef_server']
+    client_name  = params['client_name']
+    key          = params['client_key']
+    # name         = params['name']
+    items        = params['items'] || []
+    id           = params['id']
+
+    fail 'Client Name (client_name) is required' unless client_name
+    fail 'Private Key (client_key) is required' unless key
+    fail 'Organization (organization) or Chef Server URL (chef_server) is required' unless organization || chef_server
+    fail 'Organization (organization) or Chef Server URL (chef_server) is required, but not both' if organization && chef_server
+    fail 'Data Bag ID (id) is required' unless id
+    # fail 'New Name (name) or new Items (items) are required' if !name || !(items && items.empty?)
+
+    if items
+      fail "Items (items) must be an Array" unless items.is_a?(Array)
+      fail "All Items must be a Hash" unless items.all? {|item| item.is_a?(Hash)}
+      fail "All Items must inclue an 'id'" unless items.all? {|item| item.include?('id') }
+    end
+
+    chef_server ||= "https://api.opscode.com/organizations/#{organization}"
+
+    info 'Setting up private key'
+    begin
+      private_key_file = Tempfile.new('private')
+      private_key_file.write(key)
+      private_key_file.close
+    rescue
+      fail 'Failed to setup private key'
+    end
+
+    connection_settings = {
+      endpoint: chef_server,
+      client:   client_name,
+      key:      private_key_file.path,
+    }
+
+    begin
+      chef = ChefAPI::Connection.new connection_settings
+      data_bag = chef.data_bags.fetch(id)
+
+      data_bag.items.all.map! do |key,value|
+        new_value = items.find{|i| i['id']==key}
+        value.deep_merge!(new_value) if new_value
+      end
+
+      data_bag         = chef.data_bags.fetch(id)
+      content          = data_bag.to_hash
+      content['items'] = data_bag.items.all.map {|item| item.to_hash}
     rescue => ex
       fail ex.message
     end
