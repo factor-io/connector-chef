@@ -57,5 +57,15 @@ describe 'chef' do
         expect(found_databag).to be_nil
       end
     end
+
+    it ':: items' do
+      params = @params.merge({'id'=>@databag_name})
+
+      @service_instance.test_action('items',params) do
+        contents = expect_return[:payload]
+        expect(contents).to be_a(Array)
+        puts contents
+      end
+    end
   end
 end
