@@ -6,5 +6,5 @@ env:
   - secure: hNvKhy3BjEXiN93LdJeT2l6FbHkwoZ09MaQYap+7uZ9e0STMV6Tcg1rKzZsVOT0DV7LEE9XlKb42E0g6xZfKP8cw/BXUk+XCsfm5dTjDbDQtH2TmBxgfY3aGRI2AQnkHhR7g/6NWsaghab/Buc1dbyORkd4mQ45f+VbdUlwnbKY=
   - secure: jzureysNKOM6Jtn+HgiuQtrp1Vz/xOY090Sqe9Q/BMLtSC5MAEB1dvRsN0ZFypjNJohzuGpk1kgUD3KKgZW/pC7RzOCxyAMTXVHSA0bVjh2YbQVqwiKO2jydjGTT4NO2UsXjC/mPjdUa0218r9h00cO2nEmL0yeOB+rDmocQHu4=
 before_install:
-  - openssl aes-256-cbc -k "$SUPER_SECRET_PASSWORD" -in fator-test.pem.enc -out factor-test.pem -d
-  - openssl aes-256-cbc -k "$SUPER_SECRET_PASSWORD" -in fator-test-validator.pem.enc -out factor-test-validator.pem -d
+  - openssl aes-256-cbc -k "$SUPER_SECRET_PASSWORD" -in factor-test.pem.enc -out factor-test.pem -d
+  - openssl aes-256-cbc -k "$SUPER_SECRET_PASSWORD" -in factor-test-validator.pem.enc -out factor-test-validator.pem -d
