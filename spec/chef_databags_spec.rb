@@ -15,12 +15,18 @@ describe 'chef' do
 
     it ':: create' do
       databag_name = "databag-#{SecureRandom.hex(4)}"
-      params = @params.merge({'name'=>databag_name})
+      params = @params.merge({'name'=>databag_name,'items'=>[{'id'=>'foo','some'=>{'data'=>'here'}}]})
 
       @service_instance.test_action('create',params) do
         content = expect_return[:payload]
         expect(content).to be_a(Hash)
         expect(content).to include(:name)
+
+        items = chef.data_bags.fetch(databag_name).items.all
+        expect(items).to be_a(Array)
+        expect(items.count).to eq(1)
+        expect(items[0].id).to eq('foo')
+
       end
 
       chef.data_bags.fetch(databag_name).destroy
@@ -55,16 +61,6 @@ describe 'chef' do
         expect_return
         found_databag = chef.data_bags.fetch(name)
         expect(found_databag).to be_nil
-      end
-    end
-
-    it ':: items' do
-      params = @params.merge({'id'=>@databag_name})
-
-      @service_instance.test_action('items',params) do
-        contents = expect_return[:payload]
-        expect(contents).to be_a(Array)
-        puts contents
       end
     end
   end
