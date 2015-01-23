@@ -32,5 +32,15 @@ describe 'chef' do
         expect(contents['item2']).to eq('foo'=>'baz')
       end
     end
+
+    it ':: get_item' do |params|
+      params = @params.merge('databag'=>@databag_name,'id'=>'item1')
+
+      @service_instance.test_action('get_item',params) do
+        contents = expect_return[:payload]
+        expect(contents).to be_a(Hash)
+        expect(contents['foo']).to eq('bar')
+      end
+    end
   end
 end
