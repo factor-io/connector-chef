@@ -314,6 +314,8 @@ Factor::Connector.service 'chef_databags' do
     fail 'Organization (organization) or Chef Server URL (chef_server) is required, but not both' if organization && chef_server
     fail 'Data Bag ID (databag) is required' unless databag_id
     fail 'Item ID (id) is required' unless id
+    fail 'Data (data) is required' unless data
+    fail 'Data (data) must be a Hash' unless data.is_a?(Hash)
 
     chef_server ||= "https://api.opscode.com/organizations/#{organization}"
 
@@ -360,8 +362,6 @@ Factor::Connector.service 'chef_databags' do
     fail 'Organization (organization) or Chef Server URL (chef_server) is required, but not both' if organization && chef_server
     fail 'Data Bag ID (databag) is required' unless databag_id
     fail 'Item ID (id) is required' unless id
-    fail 'Data (data) is required' unless data
-    fail 'Data (data) must be a Hash' unless data.is_a?(Hash)
 
     chef_server ||= "https://api.opscode.com/organizations/#{organization}"
 
