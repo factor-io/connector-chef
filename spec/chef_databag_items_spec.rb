@@ -20,6 +20,22 @@ describe 'chef' do
       databag.destroy if databag
     end
 
+    it ':: create_item' do
+      item_id = "item-#{SecureRandom.hex(4)}"
+      data    = {'some'=>{'data'=>'here'}}
+      params  = @params.merge('databag'=>@databag_name, 'id'=>item_id, 'data'=>data)
+
+      @service_instance.test_action('create_item',params) do
+        expect_return
+      end
+
+      data_bag     = chef.data_bags.fetch(@databag_name)
+      created_item = data_bag.items.fetch(item_id)
+
+      expect(created_item.id).to eq(item_id)
+      expect(created_item.data).to eq(data)
+    end
+
     it ':: items' do
       params = @params.merge('id'=>@databag_name)
       @service_instance.test_action('items',params) do
