@@ -5,6 +5,7 @@ describe 'chef' do
     before do
       @service_instance = service_instance('chef_databags')
       @databag_name = "databag-#{SecureRandom.hex(4)}"
+      @databag = chef.data_bags.create name: @databag_name
     end
 
     after do
