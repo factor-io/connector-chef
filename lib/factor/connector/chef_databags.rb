@@ -72,10 +72,9 @@ Factor::Connector.service 'chef_databags' do
     }
 
     begin
-      chef = ChefAPI::Connection.new connection_settings
-      data_bag         = chef.data_bags.fetch(id) 
-      content          = data_bag.to_hash
-      content['items'] = data_bag.items.all.map {|item| item.to_hash}
+      chef     = ChefAPI::Connection.new connection_settings
+      data_bag = chef.data_bags.fetch(id) 
+      content  = data_bag.to_hash
     rescue => ex
       fail ex.message
     end
@@ -91,19 +90,12 @@ Factor::Connector.service 'chef_databags' do
     client_name  = params['client_name']
     key          = params['client_key']
     name         = params['name']
-    items        = params['items'] || []
 
     fail 'Client Name (client_name) is required' unless client_name
     fail 'Private Key (client_key) is required' unless key
     fail 'Organization (organization) or Chef Server URL (chef_server) is required' unless organization || chef_server
     fail 'Organization (organization) or Chef Server URL (chef_server) is required, but not both' if organization && chef_server
     fail 'New Data Bag Name (name) is required' unless params['name']
-
-    if items
-      fail "Items (items) must be an Array" unless items.is_a?(Array)
-      fail "All Items must be a Hash" unless items.all? {|item| item.is_a?(Hash)}
-      fail "All Items must inclue an 'id'" unless items.all? {|item| item.include?('id') }
-    end
 
     chef_server ||= "https://api.opscode.com/organizations/#{organization}"
 
@@ -123,15 +115,9 @@ Factor::Connector.service 'chef_databags' do
     }
 
     begin
-      info "Creating new environment '#{params['name']}'"
-      chef = ChefAPI::Connection.new connection_settings
+      chef     = ChefAPI::Connection.new connection_settings
       data_bag = chef.data_bags.create(name: name)
-
-      items.each do |item|
-        data_bag.items.create item
-      end
-
-      content = chef.data_bags.fetch(name)
+      content  = chef.data_bags.fetch(name)
     rescue => ex
       fail ex.message
     end
@@ -144,22 +130,15 @@ Factor::Connector.service 'chef_databags' do
     chef_server  = params['chef_server']
     client_name  = params['client_name']
     key          = params['client_key']
-    # name         = params['name']
-    items        = params['items'] || []
     id           = params['id']
+    name         = params['name']
 
     fail 'Client Name (client_name) is required' unless client_name
     fail 'Private Key (client_key) is required' unless key
     fail 'Organization (organization) or Chef Server URL (chef_server) is required' unless organization || chef_server
     fail 'Organization (organization) or Chef Server URL (chef_server) is required, but not both' if organization && chef_server
     fail 'Data Bag ID (id) is required' unless id
-    # fail 'New Name (name) or new Items (items) are required' if !name || !(items && items.empty?)
-
-    if items
-      fail "Items (items) must be an Array" unless items.is_a?(Array)
-      fail "All Items must be a Hash" unless items.all? {|item| item.is_a?(Hash)}
-      fail "All Items must inclue an 'id'" unless items.all? {|item| item.include?('id') }
-    end
+    fail 'New Name (name) is required' unless name
 
     chef_server ||= "https://api.opscode.com/organizations/#{organization}"
 
@@ -179,22 +158,14 @@ Factor::Connector.service 'chef_databags' do
     }
 
     begin
-      chef = ChefAPI::Connection.new connection_settings
-      data_bag = chef.data_bags.fetch(id)
-
-      data_bag.items.all.map! do |key,value|
-        new_value = items.find{|i| i['id']==key}
-        value.deep_merge!(new_value) if new_value
-      end
-
-      data_bag         = chef.data_bags.fetch(id)
-      content          = data_bag.to_hash
-      content['items'] = data_bag.items.all.map {|item| item.to_hash}
+      chef     = ChefAPI::Connection.new connection_settings
+      data_bag = chef.data_bags.update(id, name:name)
+      content  = data_bag.to_hash
     rescue => ex
       fail ex.message
     end
 
-    action_callback content.to_hash
+    action_callback content
   end
 
 
@@ -238,5 +209,4 @@ Factor::Connector.service 'chef_databags' do
 
     action_callback
   end
-
 end

@@ -22,18 +22,12 @@ describe 'chef' do
 
     it ':: create' do
       databag_name = "databag-#{SecureRandom.hex(4)}"
-      params = @params.merge({'name'=>databag_name,'items'=>[{'id'=>'foo','some'=>{'data'=>'here'}}]})
+      params = @params.merge('name'=>databag_name)
 
       @service_instance.test_action('create',params) do
         content = expect_return[:payload]
         expect(content).to be_a(Hash)
         expect(content).to include(:name)
-
-        items = chef.data_bags.fetch(databag_name).items.all
-        expect(items).to be_a(Array)
-        expect(items.count).to eq(1)
-        expect(items[0].id).to eq('foo')
-
       end
 
       chef.data_bags.fetch(databag_name).destroy
@@ -71,23 +65,16 @@ describe 'chef' do
       end
     end
 
-
     it ':: update' do
-      new_name = "new-name-#{SecureRandom.hex(4)}"
-      params = @params.merge('id'=> @databag_name, 'items'=>[{'id'=>'item1','foo'=>'blark','something'=>'new'}])
+      name = @databag_name
+      new_name = "test-#{SecureRandom.hex(4)}"
+      params = @params.merge('id'=> name, 'name'=>new_name)
 
       @service_instance.test_action('update',params) do
         content = expect_return[:payload]
         expect(content).to be_a(Hash)
         expect(content).to include(:name)
-        expect(content).to include('items')
-        expect(content['items']).to be_a(Array)
         expect(content[:name]).to eq(new_name)
-        item1 = content['items'].find{|i| i['id']=='item1'}
-        item2 = content['items'].find{|i| i['id']=='item2'}
-        expect(item1['foo']).to eq('blark')
-        expect(item1['something']).to eq('new')
-        expect(item2['foo']).to eq('baz')
       end
     end
   end
