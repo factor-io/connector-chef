@@ -42,5 +42,14 @@ describe 'chef' do
         expect(contents['foo']).to eq('bar')
       end
     end
+
+    it ':: delete_item' do
+      params = @params.merge({'databag'=>@databag_name,'id'=>'item1'})
+    
+      @service_instance.test_action('delete_item',params) do
+        expect_return
+      end
+      expect { @databag.items.fetch('item1') }.to raise_error(ChefAPI::Error::HTTPNotFound)
+    end
   end
 end
