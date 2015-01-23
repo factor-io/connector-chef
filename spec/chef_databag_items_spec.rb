@@ -36,6 +36,22 @@ describe 'chef' do
       expect(created_item.data).to eq(data)
     end
 
+    it ':: update_item' do
+      data    = {'some'=>{'data'=>'here'}}
+      item_id = 'item1'
+      params  = @params.merge('databag'=>@databag_name, 'id'=>item_id, 'data'=>data)
+
+      @service_instance.test_action('update_item',params) do
+        expect_return
+      end
+
+      data_bag     = chef.data_bags.fetch(@databag_name)
+      created_item = data_bag.items.fetch(item_id)
+
+      expect(created_item.id).to eq(item_id)
+      expect(created_item.data).to eq(data.merge('foo'=>'bar'))
+    end
+
     it ':: items' do
       params = @params.merge('id'=>@databag_name)
       @service_instance.test_action('items',params) do
