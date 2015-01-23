@@ -37,11 +37,12 @@ RSpec.configure do |c|
   end
 
   def chef
-    connection_settings = {
+    @connection_settings ||= {
       endpoint: 'https://api.opscode.com/organizations/factor-test',
       client:   'factor-test',
       key:      client_key_file,
     }
-    ChefAPI::Connection.new connection_settings
+    @chef ||= ChefAPI::Connection.new @connection_settings
+    @chef
   end
 end
