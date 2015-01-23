@@ -5,14 +5,6 @@ describe 'chef' do
     before do
       @service_instance = service_instance('chef_databags')
       @databag_name = "databag-#{SecureRandom.hex(4)}"
-      items = [
-        {id:'item1', foo:'bar'},
-        {id:'item2', foo:'baz'}
-      ]
-      @databag = chef.data_bags.create name: @databag_name
-      items.each do |item|
-        @databag.items.create item
-      end
     end
 
     after do
