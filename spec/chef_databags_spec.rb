@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'chef' do
-  describe ':: environments' do
+  describe ':: databags' do
     before do
       @service_instance = service_instance('chef_databags')
       @databag_name = "databag-#{SecureRandom.hex(4)}"
