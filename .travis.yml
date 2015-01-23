@@ -12,7 +12,7 @@ deploy:
   provider: rubygems
   api_key:
     secure: mMY5ZBtkbojnbXBLCnMpvdokLoJU+RbeafrQ3CZpOGXK4+mg8hoY79kdNIYNImF4bhOh3G0Ol0ByCsBGcciX1hknWLyrv8ZNNxlhoDLgTozcTIi8Zyd1SkRD360LUxGn5cDOgX+7o226zh6p2B742dVcgIf8Y469cGxT855DpBg=
-  gem: connector-chef
+  gem: factor-connector-chef
   on:
     tags: true
-    repo: factor-io/connector-chef
+    all_branches: true
