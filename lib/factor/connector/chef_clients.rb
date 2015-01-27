@@ -31,6 +31,7 @@ Factor::Connector.service 'chef_clients' do
     }
 
     begin
+      info "Fetching all clients"
       chef = ChefAPI::Connection.new connection_settings
       clients = chef.clients.all
     rescue => ex
@@ -71,6 +72,7 @@ Factor::Connector.service 'chef_clients' do
     }
 
     begin
+      info "Fetching client '#{id}'"
       chef = ChefAPI::Connection.new connection_settings
       content = chef.clients.fetch(id)
     rescue => ex
@@ -159,8 +161,10 @@ Factor::Connector.service 'chef_clients' do
     }
 
     begin
+      info "Fetching client '#{id}'"
       chef = ChefAPI::Connection.new connection_settings
       content = chef.clients.fetch(id)
+      info "Destroying client '#{id}'"
       content.destroy
     rescue => ex
       fail ex.message
