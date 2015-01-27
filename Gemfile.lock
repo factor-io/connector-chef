@@ -16,7 +16,7 @@ GEM
     chef-api (0.5.0)
       logify (~> 0.1)
       mime-types
-    codeclimate-test-reporter (0.4.5)
+    codeclimate-test-reporter (0.4.6)
       simplecov (>= 0.7.1, < 1.0.0)
     deep_merge (1.0.1)
     diff-lcs (1.2.5)
