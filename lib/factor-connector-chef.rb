@@ -1,5 +1,7 @@
 require 'factor/connector/definition'
 require 'chef-api'
+require 'deep_merge'
+require 'tempfile'
 
 class ChefConnectorDefinition < Factor::Connector::Definition
   id :chef
