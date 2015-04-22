@@ -5,7 +5,7 @@ require 'factor/connector/runtime'
 require 'chef-api'
 
 CodeClimate::TestReporter.start if ENV['CODECLIMATE_REPO_TOKEN'] 
-
+Factor::Connector::Test.timeout = 15
 require 'factor-connector-chef'
 
 RSpec.configure do |c|
@@ -15,11 +15,12 @@ RSpec.configure do |c|
     @client_name = 'factor-test'
     @organization = 'factor-test'
     @params = {
-      'client_key'     => client_key,
-      'validation_key' => validation_key,
-      'client_name'    => @client_name,
-      'organization'   => @organization
+      client_key:     client_key,
+      validation_key: validation_key,
+      client_name:    @client_name,
+      organization:   @organization
     }
+    @runtime = Factor::Connector::Runtime.new(ChefConnectorDefinition)
   end
 
   def client_key_file

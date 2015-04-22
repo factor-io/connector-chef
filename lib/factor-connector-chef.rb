@@ -9,13 +9,15 @@ class ChefConnectorDefinition < Factor::Connector::Definition
     chef_server  = params.varify(:chef_server, is_a:String)
     client_name  = params.varify(:client_name, is_a:String, required:true)
     client_key   = params.varify(:client_key, is_a:String, required:true)
+    private_key_file = nil
 
     fail 'Organization (:organization) or Chef Server URL (:chef_server) is required' unless organization || chef_server
     fail 'Organization (:organization) or Chef Server URL (:chef_server) is required, but not both' if organization && chef_server
 
     chef_server ||= "https://api.opscode.com/organizations/#{organization}"
 
-    safe('Setting up private key', error:'Failed to setup private key') do
+    # safe('Setting up private key', error:'Failed to setup private key') do
+    safe('Setting up private key') do
       private_key_file = Tempfile.new('private')
       private_key_file.write(client_key)
       private_key_file.close
@@ -35,7 +37,7 @@ class ChefConnectorDefinition < Factor::Connector::Definition
     raw = block.yield
     if raw.respond_to?(:map)
       raw.map {|c| c.to_hash}
-    elsif raw.respond_to(:to_hash)
+    elsif raw.respond_to?(:to_hash)
       raw.to_hash
     else
       raw
@@ -60,7 +62,17 @@ class ChefConnectorDefinition < Factor::Connector::Definition
     end
 
     action :create do |params|
+      chef = init_chef(params)
+      name = params.varify(:name, is_a:String, required:true)
       
+      available_params = %w(admin public_key private_key validator)
+      client_params = {name:name}
+      available_params.each do |param|
+        client_params[param.to_sym] = params[param] if params.include?(param)
+      end
+
+      client = safe("Getting client with id '#{id}'"){ chef.clients.create(client_params) }
+      respond client
     end
 
     action :delete do |params|
