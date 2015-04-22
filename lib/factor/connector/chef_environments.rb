@@ -32,6 +32,7 @@ Factor::Connector.service 'chef_environments' do
     }
 
     begin
+      info "Pulling up all envioronments"
       chef = ChefAPI::Connection.new connection_settings
       contents = chef.environments.all
     rescue => ex
@@ -72,6 +73,7 @@ Factor::Connector.service 'chef_environments' do
     }
 
     begin
+      info "Fetching environment '#{id}'"
       chef = ChefAPI::Connection.new connection_settings
       content = chef.environments.fetch(id)
     rescue => ex
@@ -170,16 +172,32 @@ Factor::Connector.service 'chef_environments' do
     end
 
     begin
-      info "Creating new environment '#{env_params['name']}'"
       chef = ChefAPI::Connection.new connection_settings
-      environment = chef.environments.update(id, env_params) if env_params != {}
+      
+      if env_params != {}
+        info "Updating environment name from '#{id}' to '#{env_params[:name]}'" if env_params[:name]
+        info "Updating environment description" if env_params[:description]
+        chef.environments.update(id, env_params)
+      end
 
       if params['default_attributes'] || params['override_attributes'] || params['cookbook_versions']
         environment = chef.environments.fetch(id)
-        environment.default_attributes.deep_merge!(params['default_attributes']) if params['default_attributes']
-        environment.override_attributes.deep_merge!(params['override_attributes']) if params['override_attributes']
-        environment.cookbook_versions.deep_merge!(params['cookbook_versions']) if params['cookbook_versions']
-        environment.save
+        if params['default_attributes']
+          info "Updating default_attributes"
+          environment.default_attributes.deep_merge!(params['default_attributes'])
+        end
+        if params['override_attributes']
+          info "Updating override_attributes"
+          environment.override_attributes.deep_merge!(params['override_attributes']) 
+        end
+        if params['cookbook_versions']
+          info "Updating cookbook_versions"
+          environment.cookbook_versions.deep_merge!(params['cookbook_versions'])
+        end
+
+        info "Saving changes to attributes"
+        saved = environment.save
+        fail "Couldn't save the environment" unless saved
       end
       content = chef.environments.fetch(id)
     rescue => ex
@@ -220,8 +238,10 @@ Factor::Connector.service 'chef_environments' do
     }
 
     begin
+      info "Fetching environment '#{id}'"
       chef = ChefAPI::Connection.new connection_settings
       content = chef.environments.fetch(id)
+      info "Destroying environment '#{id}'"
       content.destroy
     rescue => ex
       fail ex.message

@@ -32,6 +32,7 @@ Factor::Connector.service 'chef_databags' do
     }
 
     begin
+      info "Fetching all data bags"
       chef = ChefAPI::Connection.new connection_settings
       contents = chef.data_bags.all
     rescue => ex
@@ -72,6 +73,7 @@ Factor::Connector.service 'chef_databags' do
     }
 
     begin
+      info "Fetching data bag '#{id}'"
       chef     = ChefAPI::Connection.new connection_settings
       data_bag = chef.data_bags.fetch(id) 
       content  = data_bag.to_hash
@@ -115,6 +117,7 @@ Factor::Connector.service 'chef_databags' do
     }
 
     begin
+      info "Creating new data bag '#{name}'"
       chef     = ChefAPI::Connection.new connection_settings
       data_bag = chef.data_bags.create(name: name)
       content  = chef.data_bags.fetch(name)
@@ -158,6 +161,7 @@ Factor::Connector.service 'chef_databags' do
     }
 
     begin
+      info "Updating data bag name from '#{id}' to '#{name}'"
       chef     = ChefAPI::Connection.new connection_settings
       data_bag = chef.data_bags.update(id, name:name)
       content  = data_bag.to_hash
@@ -200,8 +204,10 @@ Factor::Connector.service 'chef_databags' do
     }
 
     begin
+      info "Fetching data bag '#{id}'"
       chef = ChefAPI::Connection.new connection_settings
       content = chef.data_bags.fetch(id)
+      info "Destroying data bag '#{id}'"
       content.destroy
     rescue => ex
       fail ex.message
@@ -241,10 +247,12 @@ Factor::Connector.service 'chef_databags' do
     }
 
     begin
+      info "Fetching Data Bag '#{id}'"
       chef           = ChefAPI::Connection.new connection_settings
       data_bag       = chef.data_bags.fetch(id) 
       data_bag_items = 
       contents       = {}
+      info "Fetching all items for Data Bag '#{id}'"
       data_bag.items.all.each do |item|
         contents[item.id.to_s] = item.data
       end
@@ -288,8 +296,10 @@ Factor::Connector.service 'chef_databags' do
     }
 
     begin
+      info "Fetching data bag '#{databag_id}'"
       chef           = ChefAPI::Connection.new connection_settings
       data_bag       = chef.data_bags.fetch(databag_id) 
+      info "Fetching items for data bag '#{databag_id}'"
       item = data_bag.items.fetch(id)
       content = item.data
     rescue => ex
@@ -335,10 +345,13 @@ Factor::Connector.service 'chef_databags' do
     }
 
     begin
+      info "Fetching data bag '#{databag_id}'"
       chef     = ChefAPI::Connection.new connection_settings
       data_bag = chef.data_bags.fetch(databag_id) 
+      info "Fetching data bag item '#{id}'"
       item     = data_bag.items.fetch(id)
       item.data.deep_merge! data
+      info "Saving data bag item '#{id}'"
       item.save
       content = data_bag.items.fetch(id).data.to_hash
     rescue => ex
@@ -381,9 +394,12 @@ Factor::Connector.service 'chef_databags' do
     }
 
     begin
+      info "Fetching Data Bag '#{databag_id}'"
       chef     = ChefAPI::Connection.new connection_settings
       data_bag = chef.data_bags.fetch(databag_id) 
+      info "Fetching Data Bag Item '#{id}'"
       item     = data_bag.items.fetch(id)
+      info "Destroying Data Bag Item '#{id}'"
       item.destroy
     rescue => ex
       fail ex.message
@@ -428,8 +444,10 @@ Factor::Connector.service 'chef_databags' do
     }
 
     begin
+      info "Fetching Data Bag '#{databag_id}'"
       chef     = ChefAPI::Connection.new connection_settings
       data_bag = chef.data_bags.fetch(databag_id)
+      info "Creating new Data Bag Item '#{id}'"
       item     = data_bag.items.create({id:id}.merge(data))
       content  = item.to_hash
     rescue => ex
