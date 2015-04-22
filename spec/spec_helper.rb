@@ -5,7 +5,7 @@ require 'factor/connector/runtime'
 require 'chef-api'
 
 CodeClimate::TestReporter.start if ENV['CODECLIMATE_REPO_TOKEN'] 
-Factor::Connector::Test.timeout = 15
+Factor::Connector::Test.timeout = 10
 require 'factor-connector-chef'
 
 RSpec.configure do |c|

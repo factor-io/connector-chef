@@ -4,6 +4,7 @@ describe ChefConnectorDefinition do
   describe :client do
     before do
       @client = chef.clients.create name: "test-client-#{SecureRandom.hex(4)}"
+      @client_fields = [:name, :admin, :public_key, :private_key, :validator]
     end
 
     after do
@@ -23,11 +24,7 @@ describe ChefConnectorDefinition do
 
       content.each do |client|
         expect(client).to be_a(Hash)
-        expect(client).to include(:name)
-        expect(client).to include(:admin)
-        expect(client).to include(:public_key)
-        expect(client).to include(:private_key)
-        expect(client).to include(:validator)
+        expect(client.keys).to eq(@client_fields)
       end
     end
 
@@ -40,11 +37,7 @@ describe ChefConnectorDefinition do
       content = @runtime.logs.last[:data]
 
       expect(content).to be_a(Hash)
-      expect(content).to include(:name)
-      expect(content).to include(:admin)
-      expect(content).to include(:public_key)
-      expect(content).to include(:private_key)
-      expect(content).to include(:validator)
+      expect(content.keys).to eq(@client_fields)
     end
 
     it :create do
@@ -57,12 +50,8 @@ describe ChefConnectorDefinition do
       content = @runtime.logs.last[:data]
       
       expect(content).to be_a(Hash)
-      expect(content).to include(:name)
+      expect(content.keys).to eq(@client_fields)
       expect(content[:name]).to eq(client_name)
-      expect(content).to include(:admin)
-      expect(content).to include(:public_key)
-      expect(content).to include(:private_key)
-      expect(content).to include(:validator)
 
       chef.clients.fetch(client_name).destroy
     end
