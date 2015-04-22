@@ -15,7 +15,7 @@ GIT
 PATH
   remote: .
   specs:
-    factor-connector-chef (0.0.7)
+    factor-connector-chef (3.0.0)
       chef-api (~> 0.5.0)
       deep_merge (~> 1.0.1)
       net-scp (~> 1.2.1)

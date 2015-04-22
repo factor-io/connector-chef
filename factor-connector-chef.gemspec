@@ -3,13 +3,14 @@ $LOAD_PATH.push File.expand_path('../lib', __FILE__)
 
 Gem::Specification.new do |s|
   s.name          = 'factor-connector-chef'
-  s.version       = '0.0.7'
+  s.version       = '3.0.0'
   s.platform      = Gem::Platform::RUBY
   s.authors       = ['Maciej Skierkowski']
   s.email         = ['maciej@factor.io']
   s.homepage      = 'https://factor.io'
   s.summary       = 'Factor.io Connector for Chef'
-  s.files         = Dir.glob('./lib/factor/connector/*.rb')
+  s.files         = ['./lib/factor-connector-chef.rb']
+  s.license       = 'MIT'
   
   s.require_paths = ['lib']
 
