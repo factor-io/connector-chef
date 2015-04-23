@@ -17,10 +17,8 @@ describe ChefConnectorDefinition do
     end
 
     it :all do
-      @runtime.run([:client,:all], @params)
-      expect(@runtime).to respond
+      content = test_call([:client,:all])
 
-      content = @runtime.logs.last[:data]
       expect(content).to be_a(Array)
       
       expect(content.length).to be > 0
@@ -35,11 +33,7 @@ describe ChefConnectorDefinition do
 
 
     it :get do
-      params = @params.merge(id: @client.name)
-
-      @runtime.run([:client,:get], params)
-      expect(@runtime).to respond
-      content = @runtime.logs.last[:data]
+      content = test_call([:client,:get],id:@client.name)
 
       expect(content).to be_a(Hash)
       expect(content.keys).to eq(@client_fields)
@@ -47,27 +41,19 @@ describe ChefConnectorDefinition do
 
     it :create do
       client_name = "test-#{SecureRandom.hex(4)}"
-      params = @params.merge(name:client_name)
-      @runtime.run([:client,:create], params)
-
-      expect(@runtime).to respond
-
-      content = @runtime.logs.last[:data]
+      content = test_call([:client,:create],name:client_name)
       
       expect(content).to be_a(Hash)
       expect(content.keys).to eq(@client_fields)
       expect(content[:name]).to eq(client_name)
 
-      chef.clients.fetch(client_name).destroy
+      keep_trying { chef.clients.fetch(client_name).destroy }
     end
 
     it :delete do
-      params = @params.merge(id: @client.name)
-
-      @runtime.run([:client,:delete], params)
-      expect(@runtime).to respond
+      content = test_call([:client,:delete],id:@client.name)
       
-      found_client = chef.clients.fetch(@client.name)
+      found_client = keep_trying { chef.clients.fetch(@client.name) }
       expect(found_client).to be_nil
     end
   end
