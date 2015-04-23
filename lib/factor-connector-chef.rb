@@ -36,7 +36,7 @@ class ChefConnectorDefinition < Factor::Connector::Definition
 
   def safe(text, options={}, &block)
     info text
-    raw = block.yield
+    raw = keep_trying { block.yield }
     if raw.respond_to?(:map)
       raw.map {|c| c.to_hash}
     elsif raw.respond_to?(:to_hash)
@@ -47,6 +47,20 @@ class ChefConnectorDefinition < Factor::Connector::Definition
   rescue => ex
     message = options[:error] || ex.message
     fail message
+  end
+
+  def keep_trying(options={},&block)
+    tries = options[:tries] || 10
+    begin
+      block.yield
+    rescue => ex
+      tries -= 1
+      if tries > 0
+        retry
+      else
+        raise ex
+      end
+    end
   end
 
   resource :client do
