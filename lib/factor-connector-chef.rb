@@ -56,6 +56,7 @@ class ChefConnectorDefinition < Factor::Connector::Definition
     rescue => ex
       tries -= 1
       if tries > 0
+        sleep 5
         retry
       else
         raise ex
