@@ -3,9 +3,6 @@ require 'spec_helper'
 describe ChefConnectorDefinition do
   describe :databag do
     before do
-      # @service_instance = service_instance('chef_databags')
-      # @databag_name = "databag-#{SecureRandom.hex(4)}"
-      # @databag = chef.data_bags.create name: @databag_name
       keep_trying do
         @databag = chef.data_bags.create name: "test-databag-#{SecureRandom.hex(4)}"
       end
