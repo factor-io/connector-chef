@@ -4,85 +4,66 @@ describe ChefConnectorDefinition do
   describe :databag do
     describe :item do
       before do
-        # @service_instance = service_instance('chef_databags')
-        # @databag_name = "databag-#{SecureRandom.hex(4)}"
-        # items = [
-        #   {id:'item1', foo:'bar'},
-        #   {id:'item2', foo:'baz'}
-        # ]
-        # @databag = chef.data_bags.create name: @databag_name
-        # items.each do |item|
-        #   @databag.items.create item
-        # end
+        keep_trying do
+          @databag = chef.data_bags.create name: "test-databag-#{SecureRandom.hex(4)}"
+        end
+
+        items = [
+            {id:'item1', foo:'bar'},
+            {id:'item2', foo:'baz'}
+          ]
+          items.each do |item|
+            keep_trying { @databag.items.create(item) }
+          end
+
+        @databag_fields = [:name]
       end
 
       after do
-        # databag = chef.data_bags.fetch(@databag_name)
-        # databag.destroy if databag
+        @databag.destroy if @databag
       end
 
       it :create do
-        # item_id = "item-#{SecureRandom.hex(4)}"
-        # data    = {'some'=>{'data'=>'here'}}
-        # params  = @params.merge('databag'=>@databag_name, 'id'=>item_id, 'data'=>data)
+        item_id = "item-#{SecureRandom.hex(4)}"
+        data    = {'some'=>{'data'=>'here'}}
+        params  = @params.merge(databag:@databag.name, id:item_id, data:data)
 
-        # @service_instance.test_action('create_item',params) do
-        #   expect_return
-        # end
+        contents = test_call([:databag, :item, :create], params)
 
-        # data_bag     = chef.data_bags.fetch(@databag_name)
-        # created_item = data_bag.items.fetch(item_id)
+        data_bag     = keep_trying { chef.data_bags.fetch(@databag.name) }
+        created_item = keep_trying { data_bag.items.fetch(item_id) }
 
-        # expect(created_item.id).to eq(item_id)
-        # expect(created_item.data).to eq(data)
+        expect(created_item.id).to eq(item_id)
+        expect(created_item.data).to eq(data)
       end
 
       it :update do
-        # data    = {'some'=>{'data'=>'here'}}
-        # item_id = 'item1'
-        # params  = @params.merge('databag'=>@databag_name, 'id'=>item_id, 'data'=>data)
+        contents = test_call([:databag, :item, :update], databag: @databag.name, id:'item1',data:{some:{data:'here'}})
 
-        # @service_instance.test_action('update_item',params) do
-        #   expect_return
-        # end
-
-        # data_bag     = chef.data_bags.fetch(@databag_name)
-        # created_item = data_bag.items.fetch(item_id)
-
-        # expect(created_item.id).to eq(item_id)
-        # expect(created_item.data).to eq(data.merge('foo'=>'bar'))
+        item = chef.data_bags.fetch(@databag.name).items.fetch('item1')
+        expect(item.data).to eq('foo'=>'bar','some'=>{'data'=>'here'})
       end
 
       it :all do
-        # params = @params.merge('id'=>@databag_name)
-        # @service_instance.test_action('items',params) do
-        #   contents = expect_return[:payload]
-        #   expect(contents).to be_a(Hash)
-        #   expect(contents.keys.length).to eq(2)
-        #   expect(contents.keys).to include('item1')
-        #   expect(contents.keys).to include('item2')
-        #   expect(contents['item1']).to eq('foo'=>'bar')
-        #   expect(contents['item2']).to eq('foo'=>'baz')
-        # end
+        contents = test_call([:databag, :item,:all], databag: @databag.id)
+      
+        expect(contents).to be_a(Array)
+        expect(contents.length).to eq(2)
+        expect(contents).to include(id:'item1', 'foo'=>'bar')
+        expect(contents).to include(id:'item2', 'foo'=>'baz')
       end
 
-      it :get do |params|
-        # params = @params.merge('databag'=>@databag_name,'id'=>'item1')
-
-        # @service_instance.test_action('get_item',params) do
-        #   contents = expect_return[:payload]
-        #   expect(contents).to be_a(Hash)
-        #   expect(contents['foo']).to eq('bar')
-        # end
+      it :get do
+        contents = test_call([:databag, :item,:get], databag: @databag.id, id:'item1')
+      
+        expect(contents).to be_a(Hash)
+        expect(contents).to eq(id:'item1', 'foo'=>'bar')
       end
 
       it :delete do
-        # params = @params.merge({'databag'=>@databag_name,'id'=>'item1'})
-      
-        # @service_instance.test_action('delete_item',params) do
-        #   expect_return
-        # end
-        # expect { @databag.items.fetch('item1') }.to raise_error(ChefAPI::Error::HTTPNotFound)
+        contents = test_call([:databag, :item, :delete], databag: @databag.name, id:'item1')
+        items = chef.data_bags.fetch(@databag.name).items.all.map{|i| i.to_hash}
+        expect(items).to_not include(id:'item1','foo'=>'baz')
       end
     end
   end

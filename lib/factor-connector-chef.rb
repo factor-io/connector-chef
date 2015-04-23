@@ -18,7 +18,6 @@ class ChefConnectorDefinition < Factor::Connector::Definition
 
     chef_server ||= "https://api.opscode.com/organizations/#{organization}"
 
-    # safe('Setting up private key', error:'Failed to setup private key') do
     safe('Setting up private key') do
       private_key_file = Tempfile.new('private')
       private_key_file.write(client_key)
@@ -49,9 +48,8 @@ class ChefConnectorDefinition < Factor::Connector::Definition
     fail message
   end
 
-  def pull_options(params,keys=[])
+  def pull_params(params,keys=[])
     available_params = keys
-    extracted_params = {name:name}
     available_params.map{|p| p.to_sym}.each do |param|
       extracted_params[param] = params[param] if params.keys{|k| k.to_sym}.include?(param)
     end
@@ -131,25 +129,52 @@ class ChefConnectorDefinition < Factor::Connector::Definition
 
     action :delete do |params|
       chef = init_chef(params)
-      id = params.varify(:id, required:true)
+      id   = params.varify(:id, required:true)
       
       respond safe("Deleting data bag with id '#{id}'"){ chef.data_bags.fetch(id).destroy }
     end
 
     resource :item do
       action :all do |params|
+        chef = init_chef(params)
+        databag   = params.varify(:databag, required:true)
+        respond safe("Fetching all data bag items from databag '#{databag}'") {|x| chef.data_bags.fetch(databag).items.all }
       end
 
       action :get do |params|
+        chef    = init_chef(params)
+        id      = params.varify(:id, required:true)
+        databag = params.varify(:databag, required:true)
+        respond safe("Fetching data bag item '#{id}' from databag '#{databag}'") {|x| chef.data_bags.fetch(databag).items.fetch(id) }
       end
 
       action :create do |params|
+        chef    = init_chef(params)
+        databag = params.varify(:databag, required:true)
+        id      = params.varify(:id, required:true)
+        data    = params.varify(:data, required:true, default:{}, is_a:Hash)
+        
+        respond safe("Creating data bag item '#{id}' in databag '#{databag}'"){ chef.data_bags.fetch(databag).items.create({id:id}.merge(data)) }
       end
 
       action :update do |params|
+        chef    = init_chef(params)
+        databag = params.varify(:databag, required:true)
+        id      = params.varify(:id, required:true)
+        data    = params.varify(:data, required:true, default:{}, is_a:Hash)
+
+        respond safe("Updating data bag item '#{id}' for databag '#{databag}'") { |x| 
+          item = chef.data_bags.fetch(databag).items.fetch(id)
+          item.data.deep_merge!(data)
+          item.save
+        }
       end
 
       action :delete do |params|
+        chef    = init_chef(params)
+        id      = params.varify(:id, required:true)
+        databag = params.varify(:databag, required:true)
+        respond safe("Delete data bag item '#{id}' from databag '#{databag}'") {|x| chef.data_bags.fetch(databag).items.fetch(id).destroy }
       end
     end
   end
