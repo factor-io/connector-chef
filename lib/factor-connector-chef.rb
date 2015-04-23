@@ -49,6 +49,15 @@ class ChefConnectorDefinition < Factor::Connector::Definition
     fail message
   end
 
+  def pull_options(params,keys=[])
+    available_params = keys
+    extracted_params = {name:name}
+    available_params.map{|p| p.to_sym}.each do |param|
+      extracted_params[param] = params[param] if params.keys{|k| k.to_sym}.include?(param)
+    end
+    extracted_params
+  end
+
   def keep_trying(options={},&block)
     tries = options[:tries] || 10
     begin
@@ -67,15 +76,13 @@ class ChefConnectorDefinition < Factor::Connector::Definition
   resource :client do
     action :all do |params|
       chef = init_chef(params)
-      clients = safe('Fetching all clients') {|x| chef.clients.all }
-      respond clients
+      respond safe('Fetching all clients') {|x| chef.clients.all }
     end
 
     action :get do |params|
       chef = init_chef(params)
       id   = params.varify(:id, required:true)
-      client = safe("Getting client with id '#{id}'"){ chef.clients.fetch(id) }
-      respond client
+      respond safe("Getting client with id '#{id}'"){ chef.clients.fetch(id) }
     end
 
     action :create do |params|
@@ -83,58 +90,50 @@ class ChefConnectorDefinition < Factor::Connector::Definition
       name = params.varify(:name, is_a:String, required:true)
       
       available_params = %w(admin public_key private_key validator)
-      client_params = {name:name}
-      available_params.each do |param|
-        client_params[param.to_sym] = params[param] if params.include?(param)
-      end
+      client_params = {name:name}.marge(pull_params(params,available_params))
 
-      client = safe("Getting client with id '#{id}'"){ chef.clients.create(client_params) }
-      respond client
+      respond safe("Getting client with id '#{id}'"){ chef.clients.create(client_params) }
     end
 
     action :delete do |params|
       chef = init_chef(params)
-      id = params.varify(:id, required:true)
-      client = safe("Deleting client with id '#{id}'"){ chef.clients.fetch(id).destroy }
-      respond client
+      id   = params.varify(:id, required:true)
+      respond safe("Deleting client with id '#{id}'"){ chef.clients.fetch(id).destroy }
     end
   end
 
   resource :databag do
     action :all do |params|
       chef = init_chef(params)
-      data_bags = safe('Fetching all data bags') {|x| chef.data_bags.all }
-      respond data_bags
+      respond safe('Fetching all data bags') {|x| chef.data_bags.all }
     end
 
     action :get do |params|
       chef = init_chef(params)
-      id = params.varify(:id, required:true)
-      data_bag = safe("Fetching data bags with id '#{id}'") {|x| chef.data_bags.fetch(id) }
-      respond data_bag
+      id   = params.varify(:id, required:true)
+      respond safe("Fetching data bags with id '#{id}'") {|x| chef.data_bags.fetch(id) }
     end
 
     action :create do |params|
       chef = init_chef(params)
       name = params.varify(:name, is_a:String, required:true)
       
-      data_bag = safe("Getting client with id '#{id}'"){ chef.data_bags.create(name:name) }
-      respond data_bag
+      respond safe("Getting client with id '#{id}'"){ chef.data_bags.create(name:name) }
     end
 
     action :update do |params|
       chef = init_chef(params)
       id   = params.varify(:id, required:true)
       name = params.varify(:name, is_a:String, required:true)
-      data_bag = safe("Fetching data bags with id '#{id}'") {|x| chef.data_bags.update(id,name:name) }
-      respond data_bag
+      
+      respond safe("Fetching data bags with id '#{id}'") {|x| chef.data_bags.update(id,name:name) }
     end
 
     action :delete do |params|
       chef = init_chef(params)
       id = params.varify(:id, required:true)
-      data_bag = safe("Deleting data bag with id '#{id}'"){ chef.data_bags.fetch(id).destroy }
-      respond data_bag
+      
+      respond safe("Deleting data bag with id '#{id}'"){ chef.data_bags.fetch(id).destroy }
     end
 
     resource :item do
@@ -158,15 +157,13 @@ class ChefConnectorDefinition < Factor::Connector::Definition
   resource :environment do
     action :all do |params|
       chef = init_chef(params)
-      environments = safe('Fetching all environments') {|x| chef.environments.all }
-      respond environments
+      respond safe('Fetching all environments') {|x| chef.environments.all }
     end
 
     action :get do |params|
       chef = init_chef(params)
-      id = params.varify(:id, required:true)
-      environment = safe("Fetching environments with id '#{id}'") {|x| chef.environments.fetch(id) }
-      respond environment
+      id   = params.varify(:id, required:true)
+      respond safe("Fetching environments with id '#{id}'") {|x| chef.environments.fetch(id) }
     end
 
     action :create do |params|
@@ -175,13 +172,9 @@ class ChefConnectorDefinition < Factor::Connector::Definition
       description = params.varify(:description, is_a:String, required:true)
       
       available_params = %w(default_attributes override_attributes cookbook_versions)
-      env_params = {name: name, description: description}
-      available_params.map{|p| p.to_sym}.each do |param|
-        env_params[param] = params[param] if params.include?(param)
-      end
+      env_params = {name: name, description: description}.merge(pull_params(params,available_params))
 
-      environment = safe("Getting client with id '#{id}'"){ chef.environments.create(env_params) }
-      respond environment
+      respond safe("Getting client with id '#{id}'"){ chef.environments.create(env_params) }
     end
 
     action :update do |params|
@@ -191,20 +184,15 @@ class ChefConnectorDefinition < Factor::Connector::Definition
       description = params.varify(:description, is_a:String)
       
       available_params = %w(name description default_attributes override_attributes cookbook_versions)
-      env_params = {}
-      available_params.map{|p| p.to_sym}.each do |param|
-        env_params[param] = params[param] if params.include?(param)
-      end
+      env_params = pull_params(params,available_params)
 
-      environment = safe("Fetching environments with id '#{id}'") {|x| chef.environments.update(id,env_params) }
-      respond environment
+      respond safe("Fetching environments with id '#{id}'") {|x| chef.environments.update(id,env_params) }
     end
 
     action :delete do |params|
       chef = init_chef(params)
-      id = params.varify(:id, required:true)
-      environment = safe("Deleting environment with id '#{id}'"){ chef.environments.fetch(id).destroy }
-      respond environment
+      id   = params.varify(:id, required:true)
+      respond safe("Deleting environment with id '#{id}'"){ chef.environments.fetch(id).destroy }
     end
   end
 
