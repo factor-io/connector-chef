@@ -8,7 +8,7 @@ describe ChefConnectorDefinition do
 
     if ENV['CHEF_TEST_HOST'] && ENV['CHEF_TEST_NAME'] && ENV['CHEF_TEST_RUNLIST']
 
-      it ':: bootstrap' do
+      it :bootstrap do
 
         # bootstrap_params = {
         #   'host'    => ENV['CHEF_TEST_HOST'],

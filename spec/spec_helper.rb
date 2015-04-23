@@ -5,11 +5,15 @@ require 'factor/connector/runtime'
 require 'chef-api'
 
 CodeClimate::TestReporter.start if ENV['CODECLIMATE_REPO_TOKEN'] 
-Factor::Connector::Test.timeout = 10
+
+
+
 require 'factor-connector-chef'
 
 RSpec.configure do |c|
   c.include Factor::Connector::Test
+
+  Factor::Connector::Test.timeout = 30
 
   c.before do
     @client_name = 'factor-test'
@@ -47,5 +51,26 @@ RSpec.configure do |c|
     }
     @chef ||= ChefAPI::Connection.new @connection_settings
     @chef
+  end
+
+  def test_call(path,params={})
+    @runtime.run(path, @params.merge(params))
+    expect(@runtime).to respond
+    content = @runtime.logs.last[:data]
+    content
+  end
+
+  def keep_trying(options={},&block)
+    tries = options[:tries] || 10
+    begin
+      block.call
+    rescue => ex
+      tries -= 1
+      if tries > 0
+        retry
+      else
+        raise ex
+      end
+    end
   end
 end

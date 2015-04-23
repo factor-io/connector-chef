@@ -85,20 +85,41 @@ class ChefConnectorDefinition < Factor::Connector::Definition
     end
   end
 
-  resource :databage do
+  resource :databag do
     action :all do |params|
+      chef = init_chef(params)
+      data_bags = safe('Fetching all data bags') {|x| chef.data_bags.all }
+      respond data_bags
     end
 
     action :get do |params|
+      chef = init_chef(params)
+      id = params.varify(:id, required:true)
+      data_bag = safe("Fetching data bags with id '#{id}'") {|x| chef.data_bags.fetch(id) }
+      respond data_bag
     end
 
     action :create do |params|
+      chef = init_chef(params)
+      name = params.varify(:name, is_a:String, required:true)
+      
+      data_bag = safe("Getting client with id '#{id}'"){ chef.data_bags.create(name:name) }
+      respond data_bag
     end
 
     action :update do |params|
+      chef = init_chef(params)
+      id   = params.varify(:id, required:true)
+      name = params.varify(:name, is_a:String, required:true)
+      data_bag = safe("Fetching data bags with id '#{id}'") {|x| chef.data_bags.update(id,name:name) }
+      respond data_bag
     end
 
     action :delete do |params|
+      chef = init_chef(params)
+      id = params.varify(:id, required:true)
+      data_bag = safe("Deleting data bag with id '#{id}'"){ chef.data_bags.fetch(id).destroy }
+      respond data_bag
     end
 
     resource :item do

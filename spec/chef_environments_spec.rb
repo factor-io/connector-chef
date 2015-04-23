@@ -13,7 +13,7 @@ describe ChefConnectorDefinition do
       # env.destroy if env
     end
 
-    it ':: create' do
+    it :create do
       # env_name = "test-#{SecureRandom.hex(4)}"
       # params = @params.merge({'name'=>env_name,'description'=>'A test env'})
 
@@ -33,7 +33,7 @@ describe ChefConnectorDefinition do
       # chef.environments.fetch(env_name).destroy
     end
 
-    it ':: all' do
+    it :all do
       # @service_instance.test_action('all',@params) do
       #   content = expect_return[:payload]
       #   expect(content).to be_a(Array)
@@ -51,7 +51,7 @@ describe ChefConnectorDefinition do
       # end
     end
 
-    it ':: get' do
+    it :get do
       # params = @params.merge({'id'=>@env_name})
 
       # @service_instance.test_action('get',params) do
@@ -68,7 +68,7 @@ describe ChefConnectorDefinition do
       # end
     end
 
-    it ':: delete' do
+    it :delete do
       # name = @env_name
       # params = @params.merge({'id'=>name})
     
@@ -79,7 +79,7 @@ describe ChefConnectorDefinition do
       # end
     end
 
-    it ':: update' do
+    it :update do
       
       # params = @params.merge({'id'=> @env_name, 'default_attributes'=>{ultramobile:{um_webapp:{revision:"234234"}}}})
 

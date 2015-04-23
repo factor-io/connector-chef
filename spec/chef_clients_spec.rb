@@ -3,12 +3,17 @@ require 'spec_helper'
 describe ChefConnectorDefinition do
   describe :client do
     before do
-      @client = chef.clients.create name: "test-client-#{SecureRandom.hex(4)}"
+      keep_trying do
+        @client = chef.clients.create name: "test-client-#{SecureRandom.hex(4)}"
+      end
+
       @client_fields = [:name, :admin, :public_key, :private_key, :validator]
     end
 
     after do
-      @client.destroy
+      keep_trying do
+        @client.destroy if @client
+      end
     end
 
     it :all do

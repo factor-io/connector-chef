@@ -1,7 +1,7 @@
 require 'rspec/core/rake_task'
 
 RSpec::Core::RakeTask.new :spec do |t|
-  t.rspec_opts = '--color --order random'
+  t.rspec_opts = '--color --order random --format documentation'
   t.verbose = false
 end
 
